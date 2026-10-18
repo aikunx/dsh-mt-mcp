@@ -180,6 +180,22 @@ dsh-mt-mcp/
 
 `lib/mcp-http.js` 负责 JSON-RPC over HTTP：记住 `Mcp-Session-Id`、协商协议版本、解析 `application/json` 与 `text/event-stream` 两种响应、识别 `notifications/tools/list_changed`。`lib/index.js` 把 `tools/list` 的结果逐个注册到 `ctx.tools`，工具名加 `mcp__mt__` 前缀（超长或有非法字符时加哈希后缀保证唯一）。
 
+## 安全复核说明
+
+如果你在安装前审计这个插件，以下是它接触外部世界的全部位置，其余都只是本地记录。
+
+**对外网络** — 只有一个去处：用户在设置面板里填的 MCP 端点（`lib/mcp-http.js`）。没有遥测、没有统计、没有固定的第三方主机、没有更新检查。`lib/` 里的 URL 字面量只有注释中的 `https://mt.cc` 和作为输入占位符的 `http://192.168.1.23:8787/mcp`。
+
+**文件系统** — 唯一的写入是插件自己的配置 `~/.dsh/dsh-mt-mcp.json`，以 `0600` 权限创建（`lib/index.js`）。不写其他路径，也不删除任何东西。
+
+**凭据** — 可选的 MT Bearer 令牌从面板读入，只存在上述配置文件里，只以 `Authorization` 请求头发给用户自己配置的端点。从不记录日志，回显一律掩码（`abcd****wxyz`）。不读取 `process.env`。
+
+**无动态代码** — 全文没有 `eval`、`new Function`、`vm`、`child_process` 或 shell 调用；没有挖矿或下载执行特征。
+
+**本地路由** — `/api/dsh-mt-mcp/*` 拒绝一切非 loopback 请求（同时校验来源 IP、`Host`、`Origin`），局域网内其他设备无法读取或改写配置。
+
+**第三方代码** — 运行时没有。`package.json` 不声明任何 `dependencies`，MCP 客户端是本插件自己的 `lib/mcp-http.js`。
+
 ## 已知限制
 
 - **只支持 Streamable HTTP**。MT 的 MCP 服务是 HTTP 型，插件没做 stdio 分支。
