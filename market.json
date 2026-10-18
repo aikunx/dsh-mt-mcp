@@ -1,0 +1,73 @@
+{
+  "format": 1,
+  "title": {
+    "en": "aikunx DSH Plugins",
+    "zh-cn": "aikunx 的 DSH 插件库"
+  },
+  "description": {
+    "en": "DeepSeek Harness plugins published by aikunx.",
+    "zh-cn": "aikunx 发布的 DeepSeek Harness 插件。"
+  },
+  "metadata": {
+    "categories": {
+      "integration": {
+        "title": {
+          "en": "Integration",
+          "zh-cn": "集成"
+        }
+      }
+    },
+    "labels": {
+      "official": {
+        "title": {
+          "en": "Verified",
+          "zh-cn": "已验证"
+        }
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-mt-mcp",
+      "title": {
+        "en": "MT Manager MCP",
+        "zh-cn": "MT 管理器 MCP"
+      },
+      "description": {
+        "en": "Connect the MT Manager app on your Android phone to DeepSeek Harness. Set the phone's MCP address in the Web settings page; phone file, APK and ZIP capabilities appear as mcp__mt__* tools. The address can be changed any time without restarting DSH.",
+        "zh-cn": "把手机上的 MT 管理器接进 DeepSeek Harness。在 Web 设置页填写手机的 MCP 地址，手机文件 / APK / ZIP 能力即以 mcp__mt__* 工具可用；地址随时可改，无需重启 DSH。"
+      },
+      "author": "aikunx",
+      "homepage": "https://github.com/aikunx/dsh-mt-mcp#readme",
+      "icon": "icon.svg",
+      "repository": {
+        "url": "https://github.com/aikunx/dsh-mt-mcp"
+      },
+      "metadata": {
+        "category": "integration",
+        "keywords": [
+          "mt",
+          "mt-manager",
+          "mcp",
+          "android",
+          "apk",
+          "zip"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1776528000,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/aikunx/dsh-mt-mcp",
+            "commit": "591d78da3f722086ab25d19588c85ddf8444f7f7"
+          },
+          "engines": {
+            "dsh": "^0.2.0-rc.2"
+          }
+        }
+      ]
+    }
+  ]
+}
