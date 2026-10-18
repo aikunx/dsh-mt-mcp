@@ -1,0 +1,54 @@
+{
+  "name": "dsh-mt-mcp",
+  "version": "0.1.0",
+  "description": "MT 管理器 MCP 连接（DeepSeek Harness 插件）：在 Web 设置页填写 MT 的 MCP 地址，手机文件/APK/ZIP 能力以 mcp__mt__* 工具可用",
+  "type": "module",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "author": "aikunx",
+  "homepage": "https://github.com/aikunx/dsh-mt-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aikunx/dsh-mt-mcp.git"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "mt",
+    "mt-manager",
+    "mcp",
+    "android",
+    "apk"
+  ],
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  }
+}
