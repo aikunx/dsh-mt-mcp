@@ -67,18 +67,6 @@ dsh plugin --profile web add .
 
 > 上图按面板源码的布局与尺寸参数绘制，用于说明信息结构；实际外观随你的 DSH 主题（深/浅色）变化。
 
-
-### 方式三：本地开发
-
-```bash
-git clone https://github.com/aikunx/dsh-mt-mcp.git
-cd dsh-mt-mcp
-```
-
-无需安装依赖，直接 `plugin_manager(action: "install_bundle", target: "<克隆目录绝对路径>")`。
-
-> 安装后如果插件行报 `ERR_MODULE_NOT_FOUND` 且路径指向你**之前**的安装位置，那是 Host 进程缓存了旧的模块解析结果 —— 重启 DSH 即可。
-
 ## 使用
 
 1. 手机打开 MT 管理器 → **侧拉栏 → 工具 → MCP 服务 → 启动**。
