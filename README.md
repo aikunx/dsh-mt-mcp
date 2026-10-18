@@ -22,6 +22,8 @@ DSH 自带的 MCP 客户端（`@deepseek-ai/dsh-mcp-client`）走组合配置，
 
 前提：DSH 已装好并且能用（`dsh web` 能打开界面）。
 
+本插件**没有任何运行时第三方依赖**：MCP 协议用自带的 `lib/mcp-http.js` 实现（Node 内置 `fetch`），只依赖 DSH 本身提供的 `@deepseek-ai/dsh-tools`。所以无论用哪种方式安装都不会出现依赖解析问题，也不需要 `pnpm install`。
+
 ### 方式一：从插件库安装（推荐）
 
 在设置页「插件」里把本插件的市场索引 URL 加进去，然后在 Discover 页安装：
@@ -30,14 +32,18 @@ DSH 自带的 MCP 客户端（`@deepseek-ai/dsh-mcp-client`）走组合配置，
 https://raw.githubusercontent.com/aikunx/dsh-mt-mcp/main/market.json
 ```
 
-依赖由 DSH 的包管理器负责安装，**不需要任何手动步骤**。
-
 ### 方式二：直接按 spec 安装
 
-不配索引也可以，直接告诉 DSH 装这个包（`plugin_manager` 工具的 `install_bundle`）：
+不配索引也可以，直接让 DSH 装这个包（`plugin_manager` 工具的 `install_bundle`，`target` 填下面任一形式）：
 
 ```
-git+https://github.com/aikunx/dsh-mt-mcp.git#<commit-sha>
+https://github.com/aikunx/dsh-mt-mcp#<commit-sha>
+```
+
+或者用仓库的 tarball 地址：
+
+```
+https://codeload.github.com/aikunx/dsh-mt-mcp/tar.gz/refs/heads/main
 ```
 
 装完 **刷新一次 Web 页面**（新装的客户端插件需要重新加载），设置侧栏就会出现「MT 管理器」。
@@ -47,16 +53,11 @@ git+https://github.com/aikunx/dsh-mt-mcp.git#<commit-sha>
 ```bash
 git clone https://github.com/aikunx/dsh-mt-mcp.git
 cd dsh-mt-mcp
-
-# 本地 link 场景必须平铺装依赖，原因见下方「踩坑」
-pnpm install --config.node-linker=hoisted
 ```
 
-然后 `plugin_manager(action: "install_bundle", target: "<克隆目录绝对路径>")`。
+无需安装依赖，直接 `plugin_manager(action: "install_bundle", target: "<克隆目录绝对路径>")`。
 
-> 方式三的 `pnpm install` 是**额外**步骤：以 `link:` 方式装进 profile 时，插件自己的 `node_modules` 会被直接使用，必须平铺。方式一、二由 pnpm 正规安装，会自动把依赖安置正确，无需此步（已实测验证）。
->
-> 注意：`@deepseek-ai/*` 和 `react` 由 DSH 运行时提供，本插件的 `package.json` **不声明**它们。否则会出现模块双实例，插件的 React 和 DSH 的 React 不是同一个。
+> 安装后如果插件行报 `ERR_MODULE_NOT_FOUND` 且路径指向你**之前**的安装位置，那是 Host 进程缓存了旧的模块解析结果 —— 重启 DSH 即可。
 
 ## 使用
 
@@ -126,30 +127,29 @@ MT 默认**不开认证**，任何能连到该端口的人都能调用。在 MT 
 | 传输加密 | **无**。MT 的 MCP 服务是明文 HTTP，仅限可信局域网 |
 | 数据去向 | 手机执行操作并把结果返回给 AI 工具，AI 工具可能再把它发给模型服务。只开放你愿意交给它们处理的文件 |
 
-## 踩坑：为什么必须平铺安装依赖
+## 踩坑：为什么这个插件没有任何运行时依赖
 
-这是本项目唯一一个非显然的点，也是排查了大半天的坑。
+排查了大半天的坑，值得写下来。
 
-DSH 加载插件时**保留符号链接解析**（`--preserve-symlinks` 语义）。pnpm 默认用符号链接组织 `node_modules`：
-
-```
-node_modules/@modelcontextprotocol/sdk -> .pnpm/@modelcontextprotocol+sdk@1.32.1/node_modules/@modelcontextprotocol/sdk
-```
-
-保留符号链接后，Node 会按**符号链接真实路径**逐级向上找依赖，于是在 `.pnpm/@modelcontextprotocol+sdk@1.32.1/node_modules/` 里找不到 `zod`、`zod-to-json-schema` 等兄弟依赖，插件导入直接失败：
+最初的实现直接 `import '@modelcontextprotocol/sdk'`。本地 `link:` 安装时立刻炸：
 
 ```
 Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'zod'
   imported from .../node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js
 ```
 
-**解法**：平铺安装，让依赖都落在插件自己的 `node_modules` 顶层。
+原因是 **DSH 加载插件时保留符号链接解析**（`--preserve-symlinks` 语义），而 pnpm 把包依赖放进 `.pnpm` 虚拟店：
 
-```bash
-pnpm install --config.node-linker=hoisted
+```
+node_modules/dsh-mt-mcp -> .pnpm/dsh-mt-mcp@.../node_modules/dsh-mt-mcp
+                         ^ 该目录的兄弟位置才有 @modelcontextprotocol/sdk
 ```
 
-`pnpm install` 默认不读 `.npmrc` 的 `node-linker`（实测 pnpm 11.28.5），所以必须**带上命令行参数**。`.npmrc` 里的同名设置只是意图记录。
+按符号链接真实路径向上找依赖时，SDK 的传递依赖（`zod`、`zod-to-json-schema` 等）不在上一层，于是解析失败。用 `--config.node-linker=hoisted` 平铺能缓解本地 link 场景，但**换成 tarball / git / 插件库安装时布局又不同**，用户装完照样可能失败。
+
+**最终解法：把依赖降到零。** MCP 的 Streamable HTTP 只是「POST JSON-RPC + SSE 响应」，用 Node 内置 `fetch` 一百多行就够，于是有了 `lib/mcp-http.js`。插件现在只 import DSH 自己提供的 `@deepseek-ai/dsh-tools` 和 Node 内置模块，任何安装方式都能直接加载，不需要 `pnpm install`。
+
+代价是实现了协议的一小块（initialize / tools/list / tools/call / 通知 + 会话头），不支持 stdio、resources、prompts、sampling。对「连 MT」这个目标够了。
 
 ## 结构
 
@@ -157,22 +157,25 @@ pnpm install --config.node-linker=hoisted
 dsh-mt-mcp/
 ├── package.json          # 包与 DSH bundle 声明（dsh.bundle.patch / dsh.client）
 ├── cordis.patch.yml      # 往 profile 插入 mt-mcp 这一行
+├── market.json           # 插件库索引（format 1）
+├── icon.svg
 ├── lib/
 │   ├── index.js          # Host 半：连接、mcp__mt__* 注册、/api/dsh-mt-mcp/* 路由、两个辅助工具
+│   ├── mcp-http.js       # 零依赖 MCP Streamable HTTP 客户端
 │   └── client.js         # Client 半：设置页「MT 管理器」面板
-├── .npmrc                # 记录 node-linker=hoisted 的意图
 └── README.md
 ```
 
-Host 半用 `@modelcontextprotocol/sdk` 的 `Client` + `StreamableHTTPClientTransport` 连接；`tools/list` 的结果逐个注册到 DSH 的 `ctx.tools`，工具名加 `mcp__mt__` 前缀（超长或有非法字符时加哈希后缀保证唯一）。MT 通过 `notifications/tools/list_changed` 通知工具变化时会自动重新同步。
+`lib/mcp-http.js` 负责 JSON-RPC over HTTP：记住 `Mcp-Session-Id`、协商协议版本、解析 `application/json` 与 `text/event-stream` 两种响应、识别 `notifications/tools/list_changed`。`lib/index.js` 把 `tools/list` 的结果逐个注册到 `ctx.tools`，工具名加 `mcp__mt__` 前缀（超长或有非法字符时加哈希后缀保证唯一）。
 
 ## 已知限制
 
 - **只支持 Streamable HTTP**。MT 的 MCP 服务是 HTTP 型，插件没做 stdio 分支。
+- `lib/mcp-http.js` 只实现了 initialize / tools/list / tools/call 与工具变更通知；MT 不提供的 resources、prompts、sampling 未实现。
 - 工具描述与参数 schema **原样来自 MT**，本插件不做校验增强。
 - 图片/音频类 MCP 内容块只保留类型说明，**内容不落地**。
 - 单次工具调用超时 **180 秒**（MT 重打包 APK 可能较慢，留了余量）。
-- 需要 DSH 侧有 `tools` / `systemPrompt` / `webServer` 三个服务；`@deepseek-ai/dsh-mcp-client` 的 MCP 客户端能力不在依赖里，是本插件自己实现的连接逻辑。
+- 需要 DSH 侧有 `tools` / `systemPrompt` / `webServer` 三个服务。
 
 ## 许可
 
