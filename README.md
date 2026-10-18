@@ -178,6 +178,22 @@ dsh-mt-mcp/
 
 `lib/mcp-http.js` handles JSON-RPC over HTTP: it remembers `Mcp-Session-Id`, negotiates the protocol version, parses both `application/json` and `text/event-stream` responses, and recognizes `notifications/tools/list_changed`. `lib/index.js` registers each `tools/list` result on `ctx.tools` under an `mcp__mt__` prefix (adding a hash suffix when a name is too long or contains invalid characters).
 
+## Security review notes
+
+If you are reviewing this plugin before installing, these are the only places it touches the outside world. Everything else is bookkeeping.
+
+**Outbound network** — there is exactly one destination: the MCP endpoint the user typed into the settings panel (`lib/mcp-http.js`). No telemetry, no analytics, no fixed third-party host, no update pings. The only URL literals in `lib/` are `https://mt.cc` in a comment and `http://192.168.1.23:8787/mcp` as an input placeholder.
+
+**Filesystem** — the only write is the plugin's own config, `~/.dsh/dsh-mt-mcp.json`, created with mode `0600` (`lib/index.js`). No other path is written, and nothing is deleted.
+
+**Credentials** — the optional MT bearer token is read from the panel, stored only in that config file, and sent only as an `Authorization` header to the user's configured endpoint. It is never logged and echoed only masked (`abcd****wxyz`). No `process.env` reads.
+
+**No dynamic code** — no `eval`, `new Function`, `vm`, `child_process`, or shell invocation anywhere. No crypto-mining or download-and-execute patterns.
+
+**Local routes** — `/api/dsh-mt-mcp/*` refuses any request that is not loopback (source IP, `Host`, and `Origin` are all checked), so nothing on the LAN can read or rewrite the configuration.
+
+**Third-party code** — none at runtime. `package.json` declares no `dependencies`; the MCP client is the plugin's own `lib/mcp-http.js`.
+
 ## Known limitations
 
 - **Streamable HTTP only.** MT's MCP service is HTTP-based; there is no stdio branch.
