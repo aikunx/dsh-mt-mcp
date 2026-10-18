@@ -61,7 +61,7 @@
           "source": {
             "type": "git",
             "url": "https://github.com/aikunx/dsh-mt-mcp",
-            "commit": "74f0f056c9428801f1d16b5e8228e43984055d47"
+            "commit": "f8571e477e43eb1a8b1ad81d62b930f91d48066e"
           },
           "engines": {
             "dsh": "^0.2.0-rc.2"
