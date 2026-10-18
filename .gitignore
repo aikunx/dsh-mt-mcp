@@ -1,0 +1,10 @@
+# 依赖不入库（安装方式见 README）
+node_modules/
+
+# 锁文件不入库：由 DSH 的包管理器在安装时解析
+pnpm-lock.yaml
+
+# 运行时与本地产物
+*.log
+.DS_Store
+Thumbs.db
