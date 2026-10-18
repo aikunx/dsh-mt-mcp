@@ -22,9 +22,24 @@ DSH 自带的 MCP 客户端（`@deepseek-ai/dsh-mcp-client`）走组合配置，
 
 前提：DSH 已装好并且能用（`dsh web` 能打开界面）。
 
-本插件**没有任何运行时第三方依赖**：MCP 协议用自带的 `lib/mcp-http.js` 实现（Node 内置 `fetch`），只依赖 DSH 本身提供的 `@deepseek-ai/dsh-tools`。所以无论用哪种方式安装都不会出现依赖解析问题，也不需要 `pnpm install`。
+**兼容 DSH `0.2.0-rc.2` 及以上**（`0.2.x`）。本插件**没有任何运行时第三方依赖**：MCP 协议用自带的 `lib/mcp-http.js` 实现（Node 内置 `fetch`），只依赖 DSH 本身提供的 `@deepseek-ai/dsh-tools`。所以无论用哪种方式安装都不会出现依赖解析问题，也不需要 `pnpm install`。
 
-### 方式一：从插件库安装（推荐）
+### 一键安装（推荐）
+
+复制这一行到终端：
+
+```bash
+dsh plugin --profile web add github:aikunx/dsh-mt-mcp
+```
+
+装完 **刷新一次 Web 页面**（新装的客户端插件需要重新加载），设置侧栏就会出现「MT 管理器」。
+
+> 如果你用的是别的 profile，把 `web` 换成对应名字；桌面端 Electron 托管的 `desktop` profile 由应用自己管理，不走这条命令。
+>
+> `dsh plugin` 会把参数原样转给 pnpm，所以任何 pnpm 支持的 spec 都能用，例如固定到某个提交：
+> `dsh plugin --profile web add github:aikunx/dsh-mt-mcp#<commit-sha>`
+
+### 从插件库安装
 
 在设置页「插件」里把本插件的市场索引 URL 加进去，然后在 Discover 页安装：
 
@@ -32,21 +47,26 @@ DSH 自带的 MCP 客户端（`@deepseek-ai/dsh-mcp-client`）走组合配置，
 https://raw.githubusercontent.com/aikunx/dsh-mt-mcp/main/market.json
 ```
 
-### 方式二：直接按 spec 安装
+### 本地开发
 
-不配索引也可以，直接让 DSH 装这个包（`plugin_manager` 工具的 `install_bundle`，`target` 填下面任一形式）：
-
-```
-https://github.com/aikunx/dsh-mt-mcp#<commit-sha>
-```
-
-或者用仓库的 tarball 地址：
-
-```
-https://codeload.github.com/aikunx/dsh-mt-mcp/tar.gz/refs/heads/main
+```bash
+git clone https://github.com/aikunx/dsh-mt-mcp.git
+cd dsh-mt-mcp
+dsh plugin --profile web add .
 ```
 
-装完 **刷新一次 Web 页面**（新装的客户端插件需要重新加载），设置侧栏就会出现「MT 管理器」。
+无需安装依赖。或者让支撑本会话的 Agent 调用 `plugin_manager(action: "install_bundle", target: "<克隆目录绝对路径>")`。
+
+> 安装后如果插件行报 `ERR_MODULE_NOT_FOUND` 且路径指向你**之前**的安装位置，那是 Host 进程缓存了旧的模块解析结果 —— 重启 DSH 即可。
+
+## 界面
+
+![DSH 设置页的「MT 管理器」面板](docs/settings-panel.png)
+
+设置 → MT 管理器：填地址、可选令牌，保存即连接；下方列出已发现的工具，并显示配置文件路径。
+
+> 上图按面板源码的布局与尺寸参数绘制，用于说明信息结构；实际外观随你的 DSH 主题（深/浅色）变化。
+
 
 ### 方式三：本地开发
 
