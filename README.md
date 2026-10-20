@@ -1,5 +1,7 @@
 # dsh-mt-mcp
 
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
+
 连接手机上的 **MT 管理器**（[mt.cc](https://mt.cc)）与 **DeepSeek Harness（DSH）** · Connect **MT Manager** ([mt.cc](https://mt.cc)) on your Android phone to **DeepSeek Harness (DSH)**.
 
 > 本页默认显示**简体中文**。英文版在下方折叠区，点开即在当前页面展开，不会跳转。
@@ -428,7 +430,3 @@ MIT
 ## 许可 / License
 
 MIT
-
----
-
-[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
