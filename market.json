@@ -15,6 +15,18 @@
           "en": "Integration",
           "zh-cn": "集成"
         }
+      },
+      "infrastructure": {
+        "title": {
+          "en": "infrastructure",
+          "zh-cn": "基础设施"
+        }
+      },
+      "developer-tools": {
+        "title": {
+          "en": "developer tools",
+          "zh-cn": "开发工具"
+        }
       }
     },
     "labels": {
@@ -62,6 +74,53 @@
             "type": "git",
             "url": "https://github.com/aikunx/dsh-mt-mcp",
             "commit": "bfbd85970a100ff9c62882213945e172eb47df38"
+          },
+          "engines": {
+            "dsh": "^0.2.0-rc.2"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dsh-cloudflare-codemode",
+      "title": {
+        "en": "Cloudflare Code Mode",
+        "zh-cn": "Cloudflare 全功能管家"
+      },
+      "description": {
+        "en": "Connect Cloudflare's official Code Mode MCP to DeepSeek Harness. The model gets search and execute over 2,500+ Cloudflare API endpoints (Workers, Pages, DNS, R2, KV, D1, Zero Trust), with a settings panel for OAuth 2.1 or API token. Credentials stay on this machine.",
+        "zh-cn": "把 Cloudflare 官方 Code Mode MCP 接入 DeepSeek Harness。AI 通过 search 与 execute 访问 2,500+ Cloudflare API（Workers、Pages、DNS、R2、KV、D1、Zero Trust），并附带 OAuth 2.1 / API Token 双认证设置面板；凭据只存本机。"
+      },
+      "author": "aikunx",
+      "homepage": "https://github.com/aikunx/dsh-cloudflare-codemode#readme",
+      "icon": "icon.svg",
+      "repository": {
+        "url": "https://github.com/aikunx/dsh-cloudflare-codemode"
+      },
+      "metadata": {
+        "category": "integration",
+        "keywords": [
+          "cloudflare",
+          "mcp",
+          "code-mode",
+          "workers",
+          "pages",
+          "dns",
+          "r2",
+          "kv",
+          "d1",
+          "zero-trust",
+          "oauth"
+        ]
+      },
+      "versions": [
+        {
+          "version": "1.0.0",
+          "publishTimestamp": 1792531092,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/aikunx/dsh-cloudflare-codemode",
+            "commit": "d66e3ac67f4e974f4ef349dc095b07b2d4617ee3"
           },
           "engines": {
             "dsh": "^0.2.0-rc.2"
