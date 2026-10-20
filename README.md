@@ -1,7 +1,7 @@
 # dsh-mt-mcp
 
 [![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
-![DSH plugin 0.1.0](https://img.shields.io/badge/DSH_plugin-0.1.0-4D6BFE?style=flat-square&logo=deepseek&logoColor=white) ![MCP Streamable HTTP](https://img.shields.io/badge/MCP-Streamable_HTTP-blueviolet?style=flat-square) ![deps 0](https://img.shields.io/badge/deps-0-brightgreen?style=flat-square) ![platform Android](https://img.shields.io/badge/platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white) ![license MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![DSH plugin 0.1.0](https://img.shields.io/badge/DSH_plugin-0.1.0-4D6BFE?style=flat-square&logo=deepseek&logoColor=white) ![MCP Streamable HTTP](https://img.shields.io/badge/MCP-Streamable_HTTP-blueviolet?style=flat-square) ![deps 0](https://img.shields.io/badge/deps-0-brightgreen?style=flat-square) ![MT Manager Android](https://img.shields.io/badge/MT_Manager-Android-3DDC84?style=flat-square&logo=android&logoColor=white) ![license MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
 连接手机上的 **MT 管理器**（[mt.cc](https://mt.cc)）与 **DeepSeek Harness（DSH）** · Connect **MT Manager** ([mt.cc](https://mt.cc)) on your Android phone to **DeepSeek Harness (DSH)**.
 
