@@ -3,6 +3,17 @@
 [![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
 ![DSH plugin 0.1.0](https://img.shields.io/badge/DSH_plugin-0.1.0-4D6BFE?style=flat-square&logo=deepseek&logoColor=white) ![MCP Streamable HTTP](https://img.shields.io/badge/MCP-Streamable_HTTP-blueviolet?style=flat-square) ![deps 0](https://img.shields.io/badge/deps-0-brightgreen?style=flat-square) ![MT Manager Android](https://img.shields.io/badge/MT_Manager-Android-3DDC84?style=flat-square&logo=android&logoColor=white) ![license MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
+## 安装
+
+```bash
+# 从 npm 安装（推荐）
+dsh plugin --profile web add dsh-mt-mcp
+
+# 或从 GitHub 源码安装
+dsh plugin --profile web add github:aikunx/dsh-mt-mcp
+```
+
+桌面端把 `web` 换成 `desktop`。装完**重启 DSH**、刷新页面，进入 **设置 → MT 管理器** 填写手机地址即可。
 连接手机上的 **MT 管理器**（[mt.cc](https://mt.cc)）与 **DeepSeek Harness（DSH）** · Connect **MT Manager** ([mt.cc](https://mt.cc)) on your Android phone to **DeepSeek Harness (DSH)**.
 
 > 本页默认显示**简体中文**。英文版在下方折叠区，点开即在当前页面展开，不会跳转。
