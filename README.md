@@ -193,13 +193,37 @@ dsh-mt-mcp/
 ├── lib/
 │   ├── index.js          # Host half: connection, mcp__mt__* registration, /api/dsh-mt-mcp/* routes, helpers
 │   ├── mcp-http.js       # dependency-free MCP Streamable HTTP client
+│   ├── annotations.js    # upstream annotations + outputSchema carriage, with DSH-subset coercion
 │   └── client.js         # Client half: the "MT Manager" settings panel
+├── tests/
+│   ├── annotations.test.js
+│   └── mcp-http.test.js
 ├── docs/
 │   └── settings-panel.png
 └── README.md             # bilingual in one page: Chinese by default, English collapsed
 ```
 
 `lib/mcp-http.js` handles JSON-RPC over HTTP: it remembers `Mcp-Session-Id`, negotiates the protocol version, parses both `application/json` and `text/event-stream` responses, and recognizes `notifications/tools/list_changed`. `lib/index.js` registers each `tools/list` result on `ctx.tools` under an `mcp__mt__` prefix (adding a hash suffix when a name is too long or contains invalid characters).
+
+Run the test suite with Node's built-in runner (no install required):
+
+```bash
+node --test tests/*.test.js
+```
+
+### Upstream metadata: annotations and outputSchema
+
+MT's 57 tools all declare `annotations`, and 56 of them declare an `outputSchema`. Both are carried across, with hard guardrails so that adding metadata can never break a tool call.
+
+**Annotations.** Each bridged tool exposes a normalised `annotations` object with all four MCP hints as explicit booleans (`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`), falling back to the conservative MCP defaults when upstream omits them. Be aware of what this does and does not do: DSH's `ToolSchema` (`@deepseek-ai/dsh-llm`) declares only `deferLoading` / `name` / `description` / `parameters`, and `defineTool` copies a fixed whitelist of fields, so **annotations are never sent to the model** and hosts do not act on them. The official `@deepseek-ai/dsh-mcp-client` bridge takes the same four fields for the same reason. The object is attached so upstream declarations are not silently discarded, not as a notification mechanism — a tool's read-only character still has to be legible from its `description`.
+
+**Output schemas.** This is an output-only declaration; it never affects argument validation. Three constraints shape it:
+
+1. **`structuredContent` stays optional.** `dsh-tools` validates every call's return value against `output.schema` and raises `ToolOutputError` on a mismatch (`INVALID_TOOL_OUTPUT`). Upstream omits `structuredContent` for plain-text and `isError` results, so `required` lists only `content`; `structuredContent` is declared in `properties` (validated when present, absent is fine).
+2. **Only the DSH-supported keyword subset is forwarded.** The validator accepts `type` / `oneOf` / `properties` / `required` / `additionalProperties` / `items` / `enum` / `const` plus annotations, and rejects anything else outright. Measured against the live server, upstream uses exactly two unsupported forms, both rewritten here: `anyOf` (48 occurrences, → `oneOf`) and `type: ["object","null"]` (56 occurrences, → a `oneOf` of the concrete branch carrying the constraints plus a bare `null` branch).
+3. **Anything not safely expressible falls back.** If a schema cannot be converted without guessing, the tool keeps the previous permissive schema. `tests/annotations.test.js` asserts this; a cross-check against the real server confirms 56 schemas forward and 1 falls back, with zero forwarded schemas that `dsh-tools` would reject.
+
+The practical, measurable effect is that the model-facing text is unchanged (it is still `render`-derived), while the canonical result now retains `structuredContent` instead of discarding it, and the declared output contract is the upstream one rather than `{}`.
 
 ### Security review notes
 
@@ -400,13 +424,37 @@ dsh-mt-mcp/
 ├── lib/
 │   ├── index.js          # Host 半：连接、mcp__mt__* 注册、/api/dsh-mt-mcp/* 路由、两个辅助工具
 │   ├── mcp-http.js       # 零依赖 MCP Streamable HTTP 客户端
+│   ├── annotations.js    # 上游注解与 outputSchema 承载，含 DSH 子集改写
 │   └── client.js         # Client 半：设置页「MT 管理器」面板
+├── tests/
+│   ├── annotations.test.js
+│   └── mcp-http.test.js
 ├── docs/
 │   └── settings-panel.png
 └── README.md             # 单页双语：中文默认，英文折叠
 ```
 
 `lib/mcp-http.js` 负责 JSON-RPC over HTTP：记住 `Mcp-Session-Id`、协商协议版本、解析 `application/json` 与 `text/event-stream` 两种响应、识别 `notifications/tools/list_changed`。`lib/index.js` 把 `tools/list` 的结果逐个注册到 `ctx.tools`，工具名加 `mcp__mt__` 前缀（超长或有非法字符时加哈希后缀保证唯一）。
+
+测试用 Node 内置 runner 跑，无需安装任何依赖：
+
+```bash
+node --test tests/*.test.js
+```
+
+## 上游元数据：注解与 outputSchema
+
+MT 的 57 个工具全部声明了 `annotations`，其中 56 个还声明了 `outputSchema`。这两样都被带过来了，并且带硬性护栏——**多带元数据绝不能弄坏一次工具调用**。
+
+**注解。** 每个桥接出来的工具都有一个归一化的 `annotations` 对象，四个 MCP hint 全是显式 boolean（`readOnlyHint` / `destructiveHint` / `idempotentHint` / `openWorldHint`），上游没声明时回落到 MCP 规范的保守默认值。但要知道它做到了什么、没做到什么：DSH 的 `ToolSchema`（`@deepseek-ai/dsh-llm`）只声明 `deferLoading` / `name` / `description` / `parameters`，`defineTool` 只按固定白名单拷贝字段，**注解从不发给模型**，宿主也不会据此决策。官方的 `@deepseek-ai/dsh-mcp-client` 桥接出于同样的原因也只取这四个字段。挂上这个对象是为了不把上游已经给出的声明悄悄丢掉，而不是当作提示机制——工具的只读性仍然要靠它的 `description` 说清。
+
+**输出 schema。** 这只是对输出的声明，不参与入参校验。三条约束决定了它的形态：
+
+1. **`structuredContent` 保持可选。** `dsh-tools` 会拿 `output.schema` 校验每次调用的真实返回值，不匹配就抛 `ToolOutputError`（`INVALID_TOOL_OUTPUT`）。上游在纯文本结果和 `isError` 结果里会省略 `structuredContent`，所以 `required` 只写 `content`；`structuredContent` 声明在 `properties` 里——存在则校验，缺席不算违规。
+2. **只透传 DSH 支持的子集。** 校验器接受 `type` / `oneOf` / `properties` / `required` / `additionalProperties` / `items` / `enum` / `const` 加注解类关键字，其余一律直接拒绝。对着真实服务实测，上游只有两种越界写法，都在这里做了等价改写：`anyOf`（48 处，改成 `oneOf`）和 `type: ["object","null"]`（56 处，展开成一个带约束的具体分支加一个裸 `null` 分支的 `oneOf`）。
+3. **无法安全表达的一律回落。** 若某个 schema 不做猜测就无法转换，该工具保留原来的宽松 schema。`tests/annotations.test.js` 断言了这一点；对着真实服务的交叉校验结果是 56 个透传、1 个回落，透传的全部都能通过 `dsh-tools` 的严格判定。
+
+实际可测的效果是：模型看到的文本没变（仍由 `render` 产出），而规范结果现在会保留 `structuredContent` 而不是丢掉，声明的输出契约也变成上游自己的而不是 `{}`。
 
 ## 安全复核说明
 

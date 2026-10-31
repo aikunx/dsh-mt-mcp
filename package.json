@@ -1,6 +1,6 @@
 {
   "name": "dsh-mt-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MT 管理器 MCP 连接（DeepSeek Harness 插件）：在 Web 设置页填写 MT 的 MCP 地址，手机文件/APK/ZIP 能力以 mcp__mt__* 工具可用",
   "type": "module",
   "main": "lib/index.js",
@@ -53,6 +53,9 @@
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
